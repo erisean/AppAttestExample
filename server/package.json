@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node ./dist/index.js",
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
+    "tsc": "tsc",
+    "postinstall": "npm run tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "asn1js": "^3.0.5",
+    "cbor": "^10.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "needle": "^3.3.1",
+    "pkijs": "^3.2.4",
+    "ts-node-dev": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/needle": "^3.3.0",
+    "@types/node": "^22.13.4",
+    "typescript": "^5.7.3"
+  }
+}
