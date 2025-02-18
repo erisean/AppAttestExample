@@ -12,6 +12,8 @@ class SecurityManager {
     
     private init() {}
     
+    static var isAttested: Bool { UserDefaults.standard.string(forKey: "AppAttestKeyId") != nil }
+    
     static func generateKey() async throws {
         guard DCAppAttestService.shared.isSupported else { throw DCError(.featureUnsupported) }
         let keyId = try await DCAppAttestService.shared.generateKey()

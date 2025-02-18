@@ -36,9 +36,7 @@ class NetworkClient {
     ) async throws -> Response {
         let request = try buildRequest(url: endpoint, method: method, headers: headers, body: body)
         
-        Logger.logRequest(request)
-        let (data, response) = try await session.data(for: request)
-        Logger.logResponse(response, data: data)
+        let (data, response) = try await dataRequest(for: request)
         
         guard let urlResponse = response as? HTTPURLResponse,
                 urlResponse.statusCode >= 200 &&
@@ -56,7 +54,7 @@ class NetworkClient {
         headers: [String: String] = [:],
         body: Body?
     ) async throws -> Response {
-        let challengeUrl = URL(string: "http://localhost:3000".appending(Endpoints.challenge.rawValue))
+        let challengeUrl = URL(string: Endpoints.base.appending(Endpoints.challenge.rawValue))
         let challengeRequest = try buildRequest(url: challengeUrl!, method: .get, headers: [:], body: nil)
         
         Logger.logRequest(challengeRequest)
@@ -85,12 +83,23 @@ class NetworkClient {
         return try decoder.decode(Response.self, from: data)
     }
     
-    private func buildRequest(
-        url: URL,
-        method: Method,
-        headers: [String: String],
-        body: Body?
-    ) throws -> URLRequest {
+    func attest() async throws {
+        if SecurityManager.isAttested { return }
+        
+        try await SecurityManager.generateKey()
+        
+        let challengeUrl = URL(string: Endpoints.base.appending(Endpoints.challenge.rawValue))
+        let (challengeData, challengeResponse) = try await dataRequest(for: URLRequest(url: challengeUrl!))
+        
+        let attestation = try await SecurityManager.attestKey(challenge: challengeData)
+        
+        let attestationUrl = URL(string: Endpoints.base.appending(Endpoints.attestation.rawValue))
+        let (attestationData, attestationResponse) = try await dataRequest(for: URLRequest(url: attestationUrl!))
+        
+        Logger.log("Attest successful.", category: .security)
+    }
+    
+    private func buildRequest(url: URL, method: Method, headers: [String: String], body: Body?) throws -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         for header in headers {
@@ -109,5 +118,11 @@ class NetworkClient {
             break
         }
         return request
+    }
+    private func dataRequest(for request: URLRequest) async throws -> (data: Data, response: URLResponse) {
+        Logger.logRequest(request)
+        let value = try await session.data(for: request)
+        Logger.logResponse(value.1, data: value.0)
+        return value
     }
 }

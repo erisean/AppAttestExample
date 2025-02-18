@@ -8,9 +8,26 @@ import OSLog
 
 class Logger {
     
+    enum Category {
+        case network, security, `default`
+    }
+    
     private init() {}
     
     private static let networkLog = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "App.DefaultSubSystem", category: "Network")
+    private static let securityLog = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "App.DefaultSubSystem", category: "Security")
+    private static let defaultLog = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "App.DefaultSubSystem", category: "Default")
+    
+    static func log(_ message: String, type: OSLogType = .default, category: Category = .default) {
+        switch category {
+        case .network:
+            os_log("%{public}@", log: networkLog, type: type, message)
+        case .security:
+            os_log("%{public}@", log: securityLog, type: type, message)
+        case .default:
+            os_log("%{public}@", log: defaultLog, type: type, message)
+        }
+    }
     
     static func logResponse(_ response: URLResponse, data: Data?) {
         guard let url = response.url else { return }

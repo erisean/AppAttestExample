@@ -29,7 +29,7 @@ app.get("/challenge/", (req: Request, res: Response) => {
   res.status(200).send(challenge)
 });
 
-app.post("/verifyAttestation/", (req: Request, res: Response) => {
+app.post("/attest/", (req: Request, res: Response) => {
   try {
     const attestation = req.body['attestation'] as string
     const challenge = req.body['challenge'] as string
